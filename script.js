@@ -4,7 +4,6 @@ const yesBtn = document.getElementById('yes');
 const music = document.getElementById('bgm');
 const musicBtn = document.getElementById('musicBtn');
 const successScreen = document.getElementById('successScreen');
-const cursorBubble = document.getElementById('cursorBubble');
 
 // ========== CONFIGURATION ==========
 const CONFIG = {
@@ -37,11 +36,10 @@ let state = {
 // ========== INIT ==========
 function init() {
   positionButtonNextToYes();
-  updateCursorBubble();
   state.animationId = requestAnimationFrame(animate);
   createHearts();
   setupEventListeners();
-  createSakuraPetals(); // Start sakura petals immediately
+  createSakuraPetals();
 }
 
 function positionButtonNextToYes() {
@@ -59,11 +57,6 @@ function positionButtonNextToYes() {
 function updateButtonPosition() { 
   noBtn.style.left = `${state.buttonX}px`; 
   noBtn.style.top = `${state.buttonY}px`; 
-}
-
-function updateCursorBubble() { 
-  cursorBubble.style.left = `${state.cursorX}px`; 
-  cursorBubble.style.top = `${state.cursorY}px`; 
 }
 
 // ========== ANIMATION ==========
@@ -146,7 +139,6 @@ function setupEventListeners() {
     state.cursorY = e.clientY;
     state.lastMouseX = e.clientX; 
     state.lastMouseY = e.clientY;
-    updateCursorBubble();
   });
 
   // Touch movement for mobile
@@ -154,7 +146,6 @@ function setupEventListeners() {
     if (e.touches.length > 0) { 
       state.cursorX = e.touches[0].clientX; 
       state.cursorY = e.touches[0].clientY; 
-      updateCursorBubble(); 
       e.preventDefault(); 
     }
   }, { passive: false });
@@ -167,7 +158,6 @@ function setupEventListeners() {
       state.animationId = null; 
     }
     noBtn.style.display = 'none'; 
-    cursorBubble.style.display = 'none';
     successScreen.classList.add('show');
     createSuccessConfetti(300); 
     playSuccessSound();
@@ -209,7 +199,6 @@ function setupEventListeners() {
           state.animationId = null; 
         }
         noBtn.style.display = 'none'; 
-        cursorBubble.style.display = 'none';
         successScreen.classList.add('show');
         createSuccessConfetti(300);
         playSuccessSound();
