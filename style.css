@@ -173,8 +173,8 @@ h1 {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 250, 250, 0.98));
     padding: 40px;
     border-radius: 30px;
-    max-width: 800px;
-    width: 90%;
+    max-width: 1200px;
+    width: 95%;
     box-shadow: 0 30px 60px rgba(255, 107, 157, 0.4),
                 0 0 0 1px rgba(255, 182, 193, 0.5);
     animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -209,13 +209,20 @@ h1 {
     background-clip: text;
 }
 
+/* ========== CONTENT WRAPPER FOR 3-COLUMN LAYOUT ========== */
+.content-wrapper {
+    display: flex;
+    gap: 25px;
+    margin: 30px 0;
+    align-items: flex-start;
+}
+
 /* ========== LOVE NOTE STYLES ========== */
 .love-note {
     text-align: left;
     font-size: 1.1rem;
     line-height: 1.8;
     color: #555;
-    margin: 30px 0;
     padding: 30px;
     background: linear-gradient(135deg, rgba(255, 240, 245, 0.9), rgba(255, 245, 250, 0.9));
     border-radius: 20px;
@@ -227,6 +234,7 @@ h1 {
     overflow-y: auto;
     position: relative;
     z-index: 2;
+    flex: 1.5;
 }
 
 .love-note p {
@@ -248,6 +256,93 @@ h1 {
     color: #ff6b9d;
     font-size: 1.2em;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* ========== PHOTO SECTIONS ========== */
+.photo-section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.photo-frame {
+    position: relative;
+    width: 100%;
+    max-width: 280px;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 245, 250, 0.95));
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(255, 107, 157, 0.3);
+    border: 3px solid #ffccd5;
+    transition: all 0.4s ease;
+    overflow: hidden;
+}
+
+.photo-frame:hover {
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 25px 50px rgba(255, 107, 157, 0.4);
+}
+
+.photo-frame img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 15px;
+    display: block;
+    border: 2px solid #ffb6c1;
+    transition: transform 0.5s ease;
+}
+
+.photo-frame:hover img {
+    transform: scale(1.05);
+}
+
+.photo-heart {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 30px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    animation: floatHearts 2s ease-in-out infinite;
+    z-index: 3;
+}
+
+/* Left Photo Animation */
+.left-photo .photo-frame {
+    animation: slideInLeft 0.8s ease 0.3s forwards;
+    opacity: 0;
+    transform: translateX(-30px);
+}
+
+/* Right Photo Animation */
+.right-photo .photo-frame {
+    animation: slideInRight 0.8s ease 0.3s forwards;
+    opacity: 0;
+    transform: translateX(30px);
+}
+
+/* Animation for photos */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px) rotate(-5deg);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) rotate(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px) rotate(5deg);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) rotate(0);
+    }
 }
 
 /* ========== SIGNATURE ========== */
@@ -379,7 +474,65 @@ h1 {
 }
 
 /* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 1024px) {
+    .content-wrapper {
+        gap: 20px;
+    }
+    
+    .love-card {
+        max-width: 95%;
+        padding: 35px;
+    }
+    
+    .love-card h1 {
+        font-size: 2.5rem;
+    }
+    
+    .love-note {
+        font-size: 1rem;
+        padding: 25px;
+    }
+    
+    .photo-frame {
+        max-width: 240px;
+    }
+    
+    .photo-frame img {
+        height: 250px;
+    }
+}
+
 @media (max-width: 768px) {
+    .content-wrapper {
+        flex-direction: column;
+        gap: 25px;
+    }
+    
+    .photo-section {
+        width: 100%;
+        max-width: 350px;
+        margin: 0 auto;
+    }
+    
+    .left-photo, .right-photo {
+        order: 0;
+    }
+    
+    .love-note {
+        order: 1;
+        max-height: 50vh;
+        flex: none;
+        width: 100%;
+    }
+    
+    .photo-frame {
+        max-width: 350px;
+    }
+    
+    .photo-frame img {
+        height: 280px;
+    }
+    
     .container h1 {
         font-size: 1.8rem;
     }
@@ -398,12 +551,6 @@ h1 {
         font-size: 2.2rem;
     }
     
-    .love-note {
-        font-size: 1rem;
-        padding: 20px;
-        max-height: 50vh;
-    }
-    
     .signature {
         font-size: 1.1rem;
     }
@@ -414,6 +561,28 @@ h1 {
 }
 
 @media (max-width: 480px) {
+    .content-wrapper {
+        gap: 20px;
+    }
+    
+    .love-note {
+        padding: 20px;
+        font-size: 0.95rem;
+    }
+    
+    .photo-frame {
+        max-width: 280px;
+        padding: 10px;
+    }
+    
+    .photo-frame img {
+        height: 220px;
+    }
+    
+    .photo-heart {
+        font-size: 24px;
+    }
+    
     .container {
         padding: 25px 20px;
     }
@@ -434,11 +603,6 @@ h1 {
     
     .love-card h1 {
         font-size: 1.8rem;
-    }
-    
-    .love-note {
-        font-size: 0.9rem;
-        padding: 15px;
     }
     
     .love-note p::before {
