@@ -15,7 +15,6 @@ body {
     font-family: 'Quicksand', sans-serif;
     overflow: hidden;
     position: relative;
-    cursor: none;
 }
 
 /* ========== CONTAINER ========== */
@@ -81,10 +80,10 @@ h1 {
     border: 2px solid #ff8fab;
     background: linear-gradient(135deg, #ffffff, #f5f5f5);
     color: #888;
-    cursor: not-allowed;
+    cursor: pointer;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     font-weight: 600;
-    pointer-events: none;
+    pointer-events: auto;
     user-select: none;
     transition: left 0.06s linear, top 0.06s linear;
     will-change: left, top;
@@ -93,17 +92,8 @@ h1 {
     text-align: center;
 }
 
-/* ========== CURSOR SAFETY BUBBLE ========== */
-#cursorBubble {
-    position: fixed;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background: transparent;
-    pointer-events: none;
-    z-index: 500;
-    transform: translate(-50%, -50%);
-    border: 2px dashed rgba(255, 107, 157, 0.3);
+#no:hover {
+    background: linear-gradient(135deg, #f9f9f9, #f0f0f0);
 }
 
 /* ========== FLOATING HEARTS ========== */
