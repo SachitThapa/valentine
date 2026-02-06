@@ -4,10 +4,6 @@ const yesBtn = document.getElementById('yes');
 const music = document.getElementById('bgm');
 const musicBtn = document.getElementById('musicBtn');
 const successScreen = document.getElementById('successScreen');
-const nextPageBtn = document.getElementById('nextPageBtn');
-const memoriesGallery = document.getElementById('memoriesGallery');
-const backBtn = document.getElementById('backBtn');
-const backToLoveBtn = document.getElementById('backToLoveBtn');
 
 // ========== CONFIGURATION ==========
 const CONFIG = {
@@ -39,6 +35,7 @@ let state = {
 
 // ========== INIT ==========
 function init() {
+  console.log("Initializing...");
   positionButtonNextToYes();
   state.animationId = requestAnimationFrame(animate);
   createHearts();
@@ -131,8 +128,94 @@ function teleportButtonAway() {
   }
 }
 
+// ========== GALLERY NAVIGATION ==========
+function setupGalleryNavigation() {
+  console.log("Setting up gallery navigation...");
+  
+  // Wait for elements to be available
+  setTimeout(() => {
+    const nextPageBtn = document.getElementById('nextPageBtn');
+    const memoriesGallery = document.getElementById('memoriesGallery');
+    const backBtn = document.getElementById('backBtn');
+    const backToLoveBtn = document.getElementById('backToLoveBtn');
+    
+    if (!nextPageBtn) {
+      console.error("Next page button not found!");
+      return;
+    }
+    
+    if (!memoriesGallery) {
+      console.error("Memories gallery not found!");
+      return;
+    }
+    
+    console.log("All gallery elements found:", { nextPageBtn, memoriesGallery, backBtn, backToLoveBtn });
+    
+    // Next Page Button
+    nextPageBtn.addEventListener('click', () => {
+      console.log("Next page button clicked!");
+      successScreen.classList.remove('show');
+      setTimeout(() => {
+        memoriesGallery.classList.add('show');
+        console.log("Gallery shown!");
+      }, 300);
+    });
+    
+    // Back Buttons
+    if (backBtn) {
+      backBtn.addEventListener('click', () => {
+        memoriesGallery.classList.remove('show');
+        setTimeout(() => {
+          successScreen.classList.add('show');
+        }, 300);
+      });
+    }
+    
+    if (backToLoveBtn) {
+      backToLoveBtn.addEventListener('click', () => {
+        memoriesGallery.classList.remove('show');
+        setTimeout(() => {
+          successScreen.classList.add('show');
+        }, 300);
+      });
+    }
+    
+    // Gallery animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.animation = 'fadeInUp 0.8s ease forwards';
+          entry.target.style.opacity = '1';
+        }
+      });
+    }, { threshold: 0.1 });
+    
+    // Add fadeInUp animation
+    if (!document.querySelector('#galleryAnimations')) {
+      const style = document.createElement('style');
+      style.id = 'galleryAnimations';
+      style.textContent = `
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+  }, 500); // Wait 500ms to ensure DOM is ready
+}
+
 // ========== EVENT LISTENERS ==========
 function setupEventListeners() {
+  console.log("Setting up event listeners...");
+  
   // Mouse movement tracking
   document.addEventListener('mousemove', e => {
     const now = performance.now();
@@ -156,6 +239,7 @@ function setupEventListeners() {
 
   // YES button click
   yesBtn.addEventListener('click', () => {
+    console.log("Yes button clicked!");
     state.isRunning = false;
     if (state.animationId) { 
       cancelAnimationFrame(state.animationId); 
@@ -165,6 +249,11 @@ function setupEventListeners() {
     successScreen.classList.add('show');
     createSuccessConfetti(300); 
     playSuccessSound();
+    
+    // Setup gallery navigation AFTER success screen is shown
+    setTimeout(() => {
+      setupGalleryNavigation();
+    }, 100);
     
     // Auto-play music on success
     if (!state.musicPlaying) {
@@ -193,7 +282,7 @@ function setupEventListeners() {
     noClickCount++;
     
     if (noClickCount >= 10) {
-      noBtn.textContent = "Okay i agree to be your valentine🥺";
+      noBtn.textContent = "I agree to be your valentine... 🥺";
       noBtn.style.cursor = 'pointer';
       noBtn.onclick = () => {
         // If user finally clicks "Okay fine...", show success screen
@@ -206,6 +295,11 @@ function setupEventListeners() {
         successScreen.classList.add('show');
         createSuccessConfetti(300);
         playSuccessSound();
+        
+        // Setup gallery navigation
+        setTimeout(() => {
+          setupGalleryNavigation();
+        }, 100);
         
         if (!state.musicPlaying) {
           music.play().catch(() => {});
@@ -240,29 +334,6 @@ function setupEventListeners() {
       musicBtn.textContent = '🔊'; 
     }
   }, { once: true });
-
-  // Next Page Button
-  nextPageBtn.addEventListener('click', () => {
-    successScreen.classList.remove('show');
-    setTimeout(() => {
-      memoriesGallery.classList.add('show');
-    }, 300);
-  });
-
-  // Back Buttons
-  backBtn.addEventListener('click', () => {
-    memoriesGallery.classList.remove('show');
-    setTimeout(() => {
-      successScreen.classList.add('show');
-    }, 300);
-  });
-
-  backToLoveBtn.addEventListener('click', () => {
-    memoriesGallery.classList.remove('show');
-    setTimeout(() => {
-      successScreen.classList.add('show');
-    }, 300);
-  });
 
   // Window resize handler
   window.addEventListener('resize', () => {
@@ -339,43 +410,5 @@ function playSuccessSound() {
   audio.play().catch(() => {}); 
 }
 
-// ========== GALLERY ANIMATIONS ==========
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.style.animation = 'fadeInUp 0.8s ease forwards';
-      entry.target.style.opacity = '1';
-    }
-  });
-}, { threshold: 0.1 });
-
-// Observe all memory items when gallery is shown
-memoriesGallery.addEventListener('transitionend', () => {
-  if (memoriesGallery.classList.contains('show')) {
-    document.querySelectorAll('.memory-item').forEach(item => {
-      item.style.opacity = '0';
-      item.style.transform = 'translateY(30px)';
-      observer.observe(item);
-    });
-  }
-});
-
-// Add fadeInUp animation
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-`;
-document.head.appendChild(style);
-
 // ========== START ==========
 window.addEventListener('load', init);
-
