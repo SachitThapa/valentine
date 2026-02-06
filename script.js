@@ -302,7 +302,7 @@ function setupEventListeners() {
         noClickCount++;
         
         if (noClickCount >= 10) {
-            noBtn.textContent = "Okay fine... 🥺";
+            noBtn.textContent = "Fine i agree to be your valentine.";
             noBtn.style.cursor = 'pointer';
             noBtn.onclick = () => {
                 // If user finally clicks "Okay fine...", show success screen
@@ -437,3 +437,4 @@ function playSuccessSound() {
 
 // ========== START ==========
 window.addEventListener('load', init);
+
