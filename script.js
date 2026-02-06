@@ -4,6 +4,10 @@ const yesBtn = document.getElementById('yes');
 const music = document.getElementById('bgm');
 const musicBtn = document.getElementById('musicBtn');
 const successScreen = document.getElementById('successScreen');
+const nextPageBtn = document.getElementById('nextPageBtn');
+const memoriesGallery = document.getElementById('memoriesGallery');
+const backBtn = document.getElementById('backBtn');
+const backToLoveBtn = document.getElementById('backToLoveBtn');
 
 // ========== CONFIGURATION ==========
 const CONFIG = {
@@ -189,7 +193,7 @@ function setupEventListeners() {
     noClickCount++;
     
     if (noClickCount >= 10) {
-      noBtn.textContent = "Okay fine I will be your valentine... 🥺";
+      noBtn.textContent = "Okay fine... 🥺";
       noBtn.style.cursor = 'pointer';
       noBtn.onclick = () => {
         // If user finally clicks "Okay fine...", show success screen
@@ -236,6 +240,29 @@ function setupEventListeners() {
       musicBtn.textContent = '🔊'; 
     }
   }, { once: true });
+
+  // Next Page Button
+  nextPageBtn.addEventListener('click', () => {
+    successScreen.classList.remove('show');
+    setTimeout(() => {
+      memoriesGallery.classList.add('show');
+    }, 300);
+  });
+
+  // Back Buttons
+  backBtn.addEventListener('click', () => {
+    memoriesGallery.classList.remove('show');
+    setTimeout(() => {
+      successScreen.classList.add('show');
+    }, 300);
+  });
+
+  backToLoveBtn.addEventListener('click', () => {
+    memoriesGallery.classList.remove('show');
+    setTimeout(() => {
+      successScreen.classList.add('show');
+    }, 300);
+  });
 
   // Window resize handler
   window.addEventListener('resize', () => {
@@ -292,7 +319,7 @@ function createSuccessConfetti(count = 300) {
 function createSakuraPetals() { 
   const petals = ['🌸', '💮', '🌺', '🌷'];
   setInterval(() => {
-    if (!state.isRunning) return; // Stop when success screen shows
+    if (!state.isRunning) return;
     
     const petal = document.createElement('div'); 
     petal.className = 'sakura'; 
@@ -312,6 +339,42 @@ function playSuccessSound() {
   audio.play().catch(() => {}); 
 }
 
+// ========== GALLERY ANIMATIONS ==========
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.animation = 'fadeInUp 0.8s ease forwards';
+      entry.target.style.opacity = '1';
+    }
+  });
+}, { threshold: 0.1 });
+
+// Observe all memory items when gallery is shown
+memoriesGallery.addEventListener('transitionend', () => {
+  if (memoriesGallery.classList.contains('show')) {
+    document.querySelectorAll('.memory-item').forEach(item => {
+      item.style.opacity = '0';
+      item.style.transform = 'translateY(30px)';
+      observer.observe(item);
+    });
+  }
+});
+
+// Add fadeInUp animation
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+document.head.appendChild(style);
+
 // ========== START ==========
 window.addEventListener('load', init);
-
