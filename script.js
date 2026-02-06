@@ -35,7 +35,6 @@ let state = {
 
 // ========== INIT ==========
 function init() {
-  console.log("Initializing...");
   positionButtonNextToYes();
   state.animationId = requestAnimationFrame(animate);
   createHearts();
@@ -128,286 +127,312 @@ function teleportButtonAway() {
   }
 }
 
+// ========== IMAGE FIXING ==========
+function fixImageSizing() {
+    const images = document.querySelectorAll('.responsive-photo');
+    
+    images.forEach(img => {
+        // Wait for image to load
+        if (img.complete) {
+            checkImageRatio(img);
+        } else {
+            img.onload = () => checkImageRatio(img);
+        }
+    });
+}
+
+function checkImageRatio(img) {
+    // If image is portrait (height > width), use contain instead of cover
+    if (img.naturalHeight > img.naturalWidth) {
+        img.classList.add('portrait');
+    }
+}
+
 // ========== GALLERY NAVIGATION ==========
 function setupGalleryNavigation() {
-  console.log("Setting up gallery navigation...");
-  
-  // Wait for elements to be available
-  setTimeout(() => {
-    const nextPageBtn = document.getElementById('nextPageBtn');
-    const memoriesGallery = document.getElementById('memoriesGallery');
-    const backBtn = document.getElementById('backBtn');
-    const backToLoveBtn = document.getElementById('backToLoveBtn');
-    
-    if (!nextPageBtn) {
-      console.error("Next page button not found!");
-      return;
-    }
-    
-    if (!memoriesGallery) {
-      console.error("Memories gallery not found!");
-      return;
-    }
-    
-    console.log("All gallery elements found:", { nextPageBtn, memoriesGallery, backBtn, backToLoveBtn });
-    
-    // Next Page Button
-    nextPageBtn.addEventListener('click', () => {
-      console.log("Next page button clicked!");
-      successScreen.classList.remove('show');
-      setTimeout(() => {
-        memoriesGallery.classList.add('show');
-        console.log("Gallery shown!");
-      }, 300);
-    });
-    
-    // Back Buttons
-    if (backBtn) {
-      backBtn.addEventListener('click', () => {
-        memoriesGallery.classList.remove('show');
-        setTimeout(() => {
-          successScreen.classList.add('show');
-        }, 300);
-      });
-    }
-    
-    if (backToLoveBtn) {
-      backToLoveBtn.addEventListener('click', () => {
-        memoriesGallery.classList.remove('show');
-        setTimeout(() => {
-          successScreen.classList.add('show');
-        }, 300);
-      });
-    }
-    
-    // Gallery animations
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.style.animation = 'fadeInUp 0.8s ease forwards';
-          entry.target.style.opacity = '1';
+    // Wait a bit for elements to be fully rendered
+    setTimeout(() => {
+        const nextPageBtn = document.getElementById('nextPageBtn');
+        const memoriesGallery = document.getElementById('memoriesGallery');
+        const backBtn = document.getElementById('backBtn');
+        const backToLoveBtn = document.getElementById('backToLoveBtn');
+        
+        if (!nextPageBtn || !memoriesGallery) {
+            console.log("Gallery elements not ready yet, retrying...");
+            setTimeout(setupGalleryNavigation, 100);
+            return;
         }
-      });
-    }, { threshold: 0.1 });
-    
-    // Add fadeInUp animation
-    if (!document.querySelector('#galleryAnimations')) {
-      const style = document.createElement('style');
-      style.id = 'galleryAnimations';
-      style.textContent = `
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        
+        // Next Page Button
+        nextPageBtn.addEventListener('click', () => {
+            successScreen.classList.remove('show');
+            setTimeout(() => {
+                memoriesGallery.classList.add('show');
+                // Fix images in gallery too
+                setTimeout(() => {
+                    const galleryImages = document.querySelectorAll('.memory-image img');
+                    galleryImages.forEach(img => {
+                        if (img.complete) {
+                            if (img.naturalHeight > img.naturalWidth) {
+                                img.style.objectFit = 'contain';
+                                img.style.background = 'linear-gradient(135deg, #fff5f5, #fff)';
+                            }
+                        } else {
+                            img.onload = function() {
+                                if (this.naturalHeight > this.naturalWidth) {
+                                    this.style.objectFit = 'contain';
+                                    this.style.background = 'linear-gradient(135deg, #fff5f5, #fff)';
+                                }
+                            };
+                        }
+                    });
+                }, 100);
+            }, 300);
+        });
+        
+        // Back Buttons
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                memoriesGallery.classList.remove('show');
+                setTimeout(() => {
+                    successScreen.classList.add('show');
+                }, 300);
+            });
         }
-      `;
-      document.head.appendChild(style);
-    }
-    
-  }, 500); // Wait 500ms to ensure DOM is ready
+        
+        if (backToLoveBtn) {
+            backToLoveBtn.addEventListener('click', () => {
+                memoriesGallery.classList.remove('show');
+                setTimeout(() => {
+                    successScreen.classList.add('show');
+                }, 300);
+            });
+        }
+        
+        // Gallery animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        // Observe memory items
+        document.querySelectorAll('.memory-item').forEach(item => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(30px)';
+            item.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(item);
+        });
+        
+    }, 500); // Wait 500ms
 }
 
 // ========== EVENT LISTENERS ==========
 function setupEventListeners() {
-  console.log("Setting up event listeners...");
-  
-  // Mouse movement tracking
-  document.addEventListener('mousemove', e => {
-    const now = performance.now();
-    const dt = (now - state.lastTime) || 16;
-    state.mouseVX = (e.clientX - state.lastMouseX) / dt * 1000;
-    state.mouseVY = (e.clientY - state.lastMouseY) / dt * 1000;
-    state.cursorX = e.clientX; 
-    state.cursorY = e.clientY;
-    state.lastMouseX = e.clientX; 
-    state.lastMouseY = e.clientY;
-  });
+    // Mouse movement tracking
+    document.addEventListener('mousemove', e => {
+        const now = performance.now();
+        const dt = (now - state.lastTime) || 16;
+        state.mouseVX = (e.clientX - state.lastMouseX) / dt * 1000;
+        state.mouseVY = (e.clientY - state.lastMouseY) / dt * 1000;
+        state.cursorX = e.clientX; 
+        state.cursorY = e.clientY;
+        state.lastMouseX = e.clientX; 
+        state.lastMouseY = e.clientY;
+    });
 
-  // Touch movement for mobile
-  document.addEventListener('touchmove', e => {
-    if (e.touches.length > 0) { 
-      state.cursorX = e.touches[0].clientX; 
-      state.cursorY = e.touches[0].clientY; 
-      e.preventDefault(); 
-    }
-  }, { passive: false });
+    // Touch movement for mobile
+    document.addEventListener('touchmove', e => {
+        if (e.touches.length > 0) { 
+            state.cursorX = e.touches[0].clientX; 
+            state.cursorY = e.touches[0].clientY; 
+            e.preventDefault(); 
+        }
+    }, { passive: false });
 
-  // YES button click
-  yesBtn.addEventListener('click', () => {
-    console.log("Yes button clicked!");
-    state.isRunning = false;
-    if (state.animationId) { 
-      cancelAnimationFrame(state.animationId); 
-      state.animationId = null; 
-    }
-    noBtn.style.display = 'none'; 
-    successScreen.classList.add('show');
-    createSuccessConfetti(300); 
-    playSuccessSound();
-    
-    // Setup gallery navigation AFTER success screen is shown
-    setTimeout(() => {
-      setupGalleryNavigation();
-    }, 100);
-    
-    // Auto-play music on success
-    if (!state.musicPlaying) {
-      music.play().catch(() => {});
-      state.musicPlaying = true;
-      musicBtn.textContent = '🔊';
-    }
-  });
-
-  // NO button click - funny responses
-  let noClickCount = 0;
-  const noResponses = [
-    "Are you sure? 😢",
-    "Really? 🥺",
-    "Think again! 💔",
-    "Pleeeease? 🥺",
-    "I'll be sad 😭",
-    "My heart hurts 💔",
-    "You're breaking my heart 💔",
-    "Just say yes! 🥺",
-    "One more chance? 🥺",
-    "Pretty please? 🥺"
-  ];
-
-  noBtn.addEventListener('click', () => {
-    noClickCount++;
-    
-    if (noClickCount >= 10) {
-      noBtn.textContent = "I agree to be your valentine... 🥺";
-      noBtn.style.cursor = 'pointer';
-      noBtn.onclick = () => {
-        // If user finally clicks "Okay fine...", show success screen
+    // YES button click
+    yesBtn.addEventListener('click', () => {
         state.isRunning = false;
         if (state.animationId) { 
-          cancelAnimationFrame(state.animationId); 
-          state.animationId = null; 
+            cancelAnimationFrame(state.animationId); 
+            state.animationId = null; 
         }
         noBtn.style.display = 'none'; 
         successScreen.classList.add('show');
-        createSuccessConfetti(300);
+        createSuccessConfetti(300); 
         playSuccessSound();
+        
+        // Fix image sizing
+        setTimeout(() => {
+            fixImageSizing();
+        }, 300);
         
         // Setup gallery navigation
         setTimeout(() => {
-          setupGalleryNavigation();
-        }, 100);
+            setupGalleryNavigation();
+        }, 400);
         
+        // Auto-play music on success
         if (!state.musicPlaying) {
-          music.play().catch(() => {});
-          state.musicPlaying = true;
-          musicBtn.textContent = '🔊';
+            music.play().catch(() => {});
+            state.musicPlaying = true;
+            musicBtn.textContent = '🔊';
         }
-      };
-    } else {
-      // Change button text based on clicks
-      const messageIndex = Math.min(noClickCount - 1, noResponses.length - 1);
-      noBtn.textContent = noResponses[messageIndex];
-    }
-  });
+    });
 
-  // Music button control
-  musicBtn.addEventListener('click', () => {
-    if (state.musicPlaying) { 
-      music.pause(); 
-      musicBtn.textContent = '🔇'; 
-    } else { 
-      music.play().catch(() => {}); 
-      musicBtn.textContent = '🔊'; 
-    }
-    state.musicPlaying = !state.musicPlaying;
-  });
+    // NO button click - funny responses
+    let noClickCount = 0;
+    const noResponses = [
+        "Are you sure? 😢",
+        "Really? 🥺",
+        "Think again! 💔",
+        "Pleeeease? 🥺",
+        "I'll be sad 😭",
+        "My heart hurts 💔",
+        "You're breaking my heart 💔",
+        "Just say yes! 🥺",
+        "One more chance? 🥺",
+        "Pretty please? 🥺"
+    ];
 
-  // Auto-play music on first click
-  document.addEventListener('click', () => {
-    if (!state.musicPlaying) { 
-      music.play().catch(() => {}); 
-      state.musicPlaying = true; 
-      musicBtn.textContent = '🔊'; 
-    }
-  }, { once: true });
+    noBtn.addEventListener('click', () => {
+        noClickCount++;
+        
+        if (noClickCount >= 10) {
+            noBtn.textContent = "Okay fine... 🥺";
+            noBtn.style.cursor = 'pointer';
+            noBtn.onclick = () => {
+                // If user finally clicks "Okay fine...", show success screen
+                state.isRunning = false;
+                if (state.animationId) { 
+                    cancelAnimationFrame(state.animationId); 
+                    state.animationId = null; 
+                }
+                noBtn.style.display = 'none'; 
+                successScreen.classList.add('show');
+                createSuccessConfetti(300);
+                playSuccessSound();
+                
+                // Fix image sizing
+                setTimeout(() => {
+                    fixImageSizing();
+                }, 300);
+                
+                // Setup gallery navigation
+                setTimeout(() => {
+                    setupGalleryNavigation();
+                }, 400);
+                
+                if (!state.musicPlaying) {
+                    music.play().catch(() => {});
+                    state.musicPlaying = true;
+                    musicBtn.textContent = '🔊';
+                }
+            };
+        } else {
+            // Change button text based on clicks
+            const messageIndex = Math.min(noClickCount - 1, noResponses.length - 1);
+            noBtn.textContent = noResponses[messageIndex];
+        }
+    });
 
-  // Window resize handler
-  window.addEventListener('resize', () => {
-    const padding = 20;
-    state.buttonX = Math.max(padding, Math.min(window.innerWidth - CONFIG.BUTTON_SIZE.width - padding, state.buttonX));
-    state.buttonY = Math.max(padding, Math.min(window.innerHeight - CONFIG.BUTTON_SIZE.height - padding, state.buttonY));
-    updateButtonPosition();
-  });
+    // Music button control
+    musicBtn.addEventListener('click', () => {
+        if (state.musicPlaying) { 
+            music.pause(); 
+            musicBtn.textContent = '🔇'; 
+        } else { 
+            music.play().catch(() => {}); 
+            musicBtn.textContent = '🔊'; 
+        }
+        state.musicPlaying = !state.musicPlaying;
+    });
+
+    // Auto-play music on first click
+    document.addEventListener('click', () => {
+        if (!state.musicPlaying) { 
+            music.play().catch(() => {}); 
+            state.musicPlaying = true; 
+            musicBtn.textContent = '🔊'; 
+        }
+    }, { once: true });
+
+    // Window resize handler
+    window.addEventListener('resize', () => {
+        const padding = 20;
+        state.buttonX = Math.max(padding, Math.min(window.innerWidth - CONFIG.BUTTON_SIZE.width - padding, state.buttonX));
+        state.buttonY = Math.max(padding, Math.min(window.innerHeight - CONFIG.BUTTON_SIZE.height - padding, state.buttonY));
+        updateButtonPosition();
+    });
 }
 
 // ========== VISUAL EFFECTS ==========
 function createHearts() { 
-  for (let i = 0; i < 8; i++) { 
-    setTimeout(() => createHeart(), i * 400); 
-  } 
-  setInterval(() => { 
-    if (state.isRunning) createHeart(); 
-  }, 1500); 
+    for (let i = 0; i < 8; i++) { 
+        setTimeout(() => createHeart(), i * 400); 
+    } 
+    setInterval(() => { 
+        if (state.isRunning) createHeart(); 
+    }, 1500); 
 }
 
 function createHeart() { 
-  const heart = document.createElement('div'); 
-  heart.className = 'heart'; 
-  heart.innerHTML = '💖'; 
-  heart.style.left = Math.random() * 100 + 'vw'; 
-  heart.style.fontSize = (20 + Math.random() * 30) + 'px'; 
-  const duration = 4 + Math.random() * 3; 
-  heart.style.animationDuration = duration + 's'; 
-  document.body.appendChild(heart); 
-  setTimeout(() => heart.remove(), duration * 1000); 
+    const heart = document.createElement('div'); 
+    heart.className = 'heart'; 
+    heart.innerHTML = '💖'; 
+    heart.style.left = Math.random() * 100 + 'vw'; 
+    heart.style.fontSize = (20 + Math.random() * 30) + 'px'; 
+    const duration = 4 + Math.random() * 3; 
+    heart.style.animationDuration = duration + 's'; 
+    document.body.appendChild(heart); 
+    setTimeout(() => heart.remove(), duration * 1000); 
 }
 
 function createSuccessConfetti(count = 300) { 
-  for (let i = 0; i < count; i++) { 
-    setTimeout(() => { 
-      const confetti = document.createElement('div'); 
-      confetti.className = 'confetti'; 
-      confetti.style.left = Math.random() * 100 + 'vw'; 
-      confetti.style.top = Math.random() * 50 + 'vh'; 
-      const colors = ['#ff6b9d', '#ff8fab', '#ffb3c1', '#ffccd5', '#c8b6ff']; 
-      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]; 
-      successScreen.appendChild(confetti); 
-      confetti.animate([
-        { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
-        { transform: `translateY(${window.innerHeight}px) rotate(${Math.random() * 720}deg)`, opacity: 0 }
-      ], {
-        duration: 1500 + Math.random() * 1500,
-        easing: 'cubic-bezier(0.42, 0, 0.58, 1)'
-      }).onfinish = () => confetti.remove(); 
-    }, i * 10); 
-  } 
+    for (let i = 0; i < count; i++) { 
+        setTimeout(() => { 
+            const confetti = document.createElement('div'); 
+            confetti.className = 'confetti'; 
+            confetti.style.left = Math.random() * 100 + 'vw'; 
+            confetti.style.top = Math.random() * 50 + 'vh'; 
+            const colors = ['#ff6b9d', '#ff8fab', '#ffb3c1', '#ffccd5', '#c8b6ff']; 
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]; 
+            successScreen.appendChild(confetti); 
+            confetti.animate([
+                { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                { transform: `translateY(${window.innerHeight}px) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+            ], {
+                duration: 1500 + Math.random() * 1500,
+                easing: 'cubic-bezier(0.42, 0, 0.58, 1)'
+            }).onfinish = () => confetti.remove(); 
+        }, i * 10); 
+    } 
 }
 
 function createSakuraPetals() { 
-  const petals = ['🌸', '💮', '🌺', '🌷'];
-  setInterval(() => {
-    if (!state.isRunning) return;
-    
-    const petal = document.createElement('div'); 
-    petal.className = 'sakura'; 
-    petal.innerText = petals[Math.floor(Math.random() * petals.length)]; 
-    petal.style.left = Math.random() * window.innerWidth + 'px'; 
-    petal.style.top = '-50px'; 
-    petal.style.fontSize = (15 + Math.random() * 25) + 'px'; 
-    petal.style.animationDuration = (5 + Math.random() * 5) + 's';
-    document.body.appendChild(petal); 
-    setTimeout(() => petal.remove(), 8000); 
-  }, 300); 
+    const petals = ['🌸', '💮', '🌺', '🌷'];
+    setInterval(() => {
+        if (!state.isRunning) return;
+        
+        const petal = document.createElement('div'); 
+        petal.className = 'sakura'; 
+        petal.innerText = petals[Math.floor(Math.random() * petals.length)]; 
+        petal.style.left = Math.random() * window.innerWidth + 'px'; 
+        petal.style.top = '-50px'; 
+        petal.style.fontSize = (15 + Math.random() * 25) + 'px'; 
+        petal.style.animationDuration = (5 + Math.random() * 5) + 's';
+        document.body.appendChild(petal); 
+        setTimeout(() => petal.remove(), 8000); 
+    }, 300); 
 }
 
 function playSuccessSound() { 
-  const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3'); 
-  audio.volume = 0.5; 
-  audio.play().catch(() => {}); 
+    const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3'); 
+    audio.volume = 0.5; 
+    audio.play().catch(() => {}); 
 }
 
 // ========== START ==========
